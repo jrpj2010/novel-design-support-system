@@ -1,0 +1,148 @@
+# 共通の制約を定義
+anchors:
+  python_constraints: &python_constraints
+    - 'PEP 8スタイルガイドに従うこと'
+    - 'type hintを使用すること'
+    - '非同期処理にはasyncio/aioを使用すること'
+    - 'ユニットテストを作成すること（カバレッジ80%以上）'
+    - 'パフォーマンス最適化（非同期処理、キャッシュなど）を行うこと'
+
+  next_constraints: &next_constraints
+    - 'Next.js 13以上を使用すること'
+    - 'TypeScriptを使用すること'
+    - 'Server ComponentsとClient Componentsを適切に使い分けること'
+    - 'レスポンシブデザインを実装すること'
+    - 'SEO対策を実装すること'
+
+  security_constraints: &security_constraints
+    - 'HTTPS通信を強制すること'
+    - 'OAuth2.0による認証を実装すること'
+    - 'データの暗号化（転送中および保存時）を行うこと'
+    - 'OWASP Top 10に対応すること'
+
+rules:
+  # バックエンド規則
+  '^backend/.*\.py$':
+    - *python_constraints
+    - *security_constraints
+    - 'main.py': |
+        FastAPIアプリケーションの初期化
+        データベース接続の確立
+        ノベル管理システムの初期化
+        APIルーターの登録
+        エラーハンドリングの実装
+        CORSミドルウェアの設定
+
+    - '^backend/app/api/novel/.*\.py$':
+      - 'router.py': |
+          依存:
+            - services.novel_service
+            - schemas.novel
+            - core.database
+          エンドポイント:
+            - POST /novel/create
+            - GET /novel/list
+            - PUT /novel/{novel_id}
+            - DELETE /novel/{novel_id}
+            - GET /novel/{novel_id}/characters
+            - GET /novel/{novel_id}/plot
+            - GET /novel/{novel_id}/timeline
+          クラス:
+            - NovelManager:
+                - create_novel(novel_data: NovelCreate) -> Novel
+                - get_novels() -> List[Novel]
+                - update_novel(novel_id: str, data: NovelUpdate) -> Novel
+                - delete_novel(novel_id: str) -> Message
+            - CharacterManager:
+                - create_character(character_data: CharacterCreate) -> Character
+                - get_characters(novel_id: str) -> List[Character]
+            - PlotManager:
+                - create_plot(plot_data: PlotCreate) -> Plot
+                - get_plot(novel_id: str) -> Plot
+            - TimelineManager:
+                - create_timeline_event(event_data: TimelineEventCreate) -> TimelineEvent
+                - get_timeline(novel_id: str) -> List[TimelineEvent]
+
+  # フロントエンド規則
+  '^frontend/.*\.(ts|tsx)$':
+    - *next_constraints
+    - 'app/layout.tsx': |
+        依存:
+          - components/Layout
+          - contexts/NovelContext
+          - styles/globals.css
+        機能:
+          - RootLayoutの定義
+          - メタデータの設定
+          - プロバイダーの設定
+
+    - 'app/novel/page.tsx': |
+        依存:
+          - components/NovelList
+          - components/NovelForm
+          - services/api/novel
+        機能:
+          - 小説プロジェクト一覧表示
+          - 新規プロジェクト作成フォーム
+          - Server-side Rendering
+
+    - 'components/NovelEditor.tsx': |
+        依存:
+          - services/api/novel
+          - types/Novel
+        機能:
+          - マークダウンエディタ
+          - リアルタイムプレビュー
+          - 自動保存機能
+
+    - 'services/api/novel.ts': |
+        依存:
+          - types/Novel
+          - utils/api
+        関数:
+          - fetchNovels(): Promise<Novel[]>
+          - createNovel(data: NovelCreate): Promise<Novel>
+          - updateNovel(id: string, data: NovelUpdate): Promise<Novel>
+          - deleteNovel(id: string): Promise<void>
+          - getCharacters(novelId: string): Promise<Character[]>
+          - getPlot(novelId: string): Promise<Plot>
+          - getTimeline(novelId: string): Promise<TimelineEvent[]>
+
+    - 'types/Novel.ts': |
+        インターフェース:
+          - Novel
+          - NovelCreate
+          - NovelUpdate
+          - Character
+          - Plot
+          - TimelineEvent
+
+データ連携:
+  backend_to_frontend:
+    - 'novel.ts -> NovelList.tsx':
+        - 小説プロジェクト一覧データ
+        - プロジェクトステータス更新
+    - 'characters.ts -> CharacterList.tsx':
+        - キャラクター一覧データ
+        - キャラクター設定更新
+    - 'plot.ts -> PlotEditor.tsx':
+        - プロット構成データ
+        - プロット更新状況
+
+non_functional_requirements:
+  performance:
+    - 'エディタの応答性能最適化（遅延なし）'
+    - 'データベースクエリの最適化'
+    - '自動保存の効率的な実装'
+  scalability:
+    - '複数プロジェクトの同時管理'
+    - '大規模な小説データの処理'
+    - 'ユーザー数増加への対応'
+  reliability:
+    - '作業内容の自動バックアップ'
+    - 'データの整合性確保'
+    - 'システムの安定性維持'
+  frontend_specific:
+    - 'First Contentful Paint 1.5秒以内'
+    - 'Time to Interactive 2秒以内'
+    - 'Lighthouse スコア90以上'

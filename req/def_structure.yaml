@@ -1,0 +1,157 @@
+- backend:
+    - app:
+        - api:
+            - novels:
+                - __init__.py: '小説管理APIの初期化ファイル。
+                               依存:
+                                 - core.novel_engine
+                                 - core.markdown_processor
+                               エクスポート:
+                                 - router
+                               クラス:
+                                 - NovelConfig: 小説設定管理
+                                   関数:
+                                     - load_novel_templates(): テンプレート読み込み
+                                     - validate_novel_structure(): 構造検証
+                               関数:
+                                 - initialize_novel_system(): 小説システム初期化'
+                - router.py: '小説管理APIルートを定義するファイル。
+                            依存:
+                              - services.novel_service
+                              - schemas.novel
+                            エンドポイント:
+                              - POST /novels/create
+                              - GET /novels/{novel_id}
+                              - PUT /novels/{novel_id}
+                              - DELETE /novels/{novel_id}
+                              - GET /novels/templates
+                            クラス:
+                              - NovelController: 小説制御ハンドラ
+                                関数:
+                                  - create_novel(novel_data: NovelCreate) -> Novel
+                                  - get_novel(novel_id: str) -> Novel
+                                  - update_novel(novel_id: str, novel_data: NovelUpdate) -> Novel
+                                  - delete_novel(novel_id: str) -> Message'
+            - characters:
+                - __init__.py: 'キャラクター管理APIの初期化ファイル。
+                               依存:
+                                 - core.character_engine
+                               エクスポート:
+                                 - router
+                               クラス:
+                                 - CharacterConfig: キャラクター設定管理
+                                   関数:
+                                     - load_character_templates(): テンプレート読み込み
+                                     - validate_character_data(): データ検証'
+                - router.py: 'キャラクター管理APIルートを定義するファイル。
+                            依存:
+                              - services.character_service
+                              - schemas.character
+                            エンドポイント:
+                              - POST /characters/create
+                              - GET /characters/{character_id}
+                              - PUT /characters/{character_id}
+                              - DELETE /characters/{character_id}
+                              - GET /characters/list/{novel_id}'
+            - worldbuilding:
+                - __init__.py: '世界観管理APIの初期化ファイル。
+                               依存:
+                                 - core.world_engine
+                               エクスポート:
+                                 - router
+                               クラス:
+                                 - WorldConfig: 世界観設定管理'
+                - router.py: '世界観管理APIルートを定義するファイル。
+                            エンドポイント:
+                              - POST /worlds/create
+                              - GET /worlds/{world_id}
+                              - PUT /worlds/{world_id}
+                              - GET /worlds/elements/{world_id}'
+        - core:
+            - __init__.py: 'コアモジュールの初期化ファイル。'
+            - novel_engine.py: '小説エンジンを実装するファイル。
+                              クラス:
+                                - NovelEngine: 小説処理エンジン
+                                  関数:
+                                    - create_structure(): 構造作成
+                                    - validate_plot(): プロット検証
+                                    - analyze_consistency(): 整合性分析'
+            - character_engine.py: 'キャラクターエンジンを実装するファイル。
+                                  クラス:
+                                    - CharacterEngine: キャラクター管理エンジン
+                                    関数:
+                                      - create_character(): キャラクター作成
+                                      - analyze_relationships(): 関係性分析'
+            - world_engine.py: '世界観エンジンを実装するファイル。
+                              クラス:
+                                - WorldEngine: 世界観管理エンジン
+                                関数:
+                                  - create_world_element(): 要素作成
+                                  - validate_consistency(): 整合性検証'
+        - models:
+            - novel.py: '小説モデルを定義するファイル。
+                        クラス:
+                          - Novel: 小説モデル
+                          - Chapter: 章モデル
+                          - Scene: シーンモデル'
+            - character.py: 'キャラクターモデルを定義するファイル。
+                           クラス:
+                             - Character: キャラクターモデル
+                             - Relationship: 関係性モデル'
+            - world.py: '世界観モデルを定義するファイル。
+                        クラス:
+                          - World: 世界観モデル
+                          - WorldElement: 世界要素モデル'
+        - schemas:
+            - novel.py: '小説スキーマを定義するファイル。
+                        クラス:
+                          - NovelCreate: 小説作成スキーマ
+                          - NovelUpdate: 小説更新スキーマ
+                          - NovelResponse: 小説レスポンススキーマ'
+            - character.py: 'キャラクタースキーマを定義するファイル。
+                           クラス:
+                             - CharacterCreate: キャラクター作成スキーマ
+                             - CharacterUpdate: キャラクター更新スキーマ'
+            - world.py: '世界観スキーマを定義するファイル。
+                        クラス:
+                          - WorldCreate: 世界観作成スキーマ
+                          - WorldUpdate: 世界観更新スキーマ'
+- frontend:
+    - app:
+        - page.tsx: 'メインページコンポーネント。
+                    依存:
+                      - components/NovelList
+                      - components/CharacterList
+                      - lib/api/novels'
+        - layout.tsx: 'レイアウトコンポーネント。
+                      依存:
+                        - components/Navigation
+                        - components/Footer'
+    - components:
+        - NovelList.tsx: '小説一覧コンポーネント。
+                         依存:
+                           - lib/api/novels'
+        - CharacterList.tsx: 'キャラクター一覧コンポーネント。
+                            依存:
+                              - lib/api/characters'
+        - WorldBuilder.tsx: '世界観構築コンポーネント。
+                           依存:
+                             - lib/api/worlds'
+    - lib:
+        - api:
+            - novels.ts: '小説API呼び出し関数。
+                        依存:
+                          - backend.api.novels.router'
+            - characters.ts: 'キャラクターAPI呼び出し関数。
+                           依存:
+                             - backend.api.characters.router'
+            - worlds.ts: '世界観API呼び出し関数。
+                        依存:
+                          - backend.api.worldbuilding.router'
+        - hooks:
+            - useNovels.ts: '小説関連カスタムフック。
+                            依存:
+                              - lib/api/novels'
+            - useCharacters.ts: 'キャラクター関連カスタムフック。
+                               依存:
+                                 - lib/api/characters'
